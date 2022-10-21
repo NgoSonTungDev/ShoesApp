@@ -110,10 +110,10 @@ const updateProduct = async (req, res, next) => {
       message: "This product Id have not in the database",
       products: {},
     });
-  if (req.body === {})
+  if (req.body.constructor === Object && Object.keys(req.body).length === 0)
     return res.status(400).json({
       statusCode: 400,
-      message: "deo co gif",
+      message: "deo co cai lon gi",
     });
   try {
     Products.findByIdAndUpdate(ProductID, req.body).then((data) => {
