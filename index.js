@@ -1,5 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const ProductsRoute = require("./routers/products");
 
 const connection_string =
   "mongodb+srv://ngosontungdev:ngosontungdev@cluster0.rwtlotx.mongodb.net/test";
@@ -30,8 +32,8 @@ app.listen(PORT || 3000, () => {
   console.log(`server is running on ${PORT}`);
 });
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("", ProductsRoute);
 
