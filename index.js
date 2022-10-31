@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const ProductsRoute = require("./routers/products");
+const UsersRoute = require("./routers/userRouter");
 
 const connection_string =
   "mongodb+srv://ngosontungdev:ngosontungdev@cluster0.rwtlotx.mongodb.net/test";
@@ -36,6 +37,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("", ProductsRoute);
+app.use("/api/user", UsersRoute);
 
 // mongoose.connect(connection_string, (error) => {
 //   if (error) {

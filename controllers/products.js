@@ -1,52 +1,25 @@
 const Products = require("../models/products");
-
+const CheckAddProductSchema = require("../helpers/validation");
 // CRUD
 // CREATE - POST
-const createProduct = (req, res, next) => {
+const createProduct = async (req, res, next) => {
   try {
-    const { productName, productBrand, type, price, quantity, images } =
-      req.body;
-    if (
-      !productName ||
-      !productBrand ||
-      !type ||
-      !price ||
-      !quantity ||
-      !images
-    ) {
-      res.status(400).json({
-        statusCode: 400,
-        message: "Some fields are not empty.",
-      });
-    }
-    let product = new Products(req.body);
+    const validReg = await CheckAddProductSchema.CheckAddProduct.validateAsync(
+      req.body
+    );
+    // let product = new Products(req.body);
+    let product = new Products(validReg);
     product.save().then((response) => {
       res.json({
         message: "Added product successfully!",
       });
     });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({
+    console.log("err : ", error);
+    return res.status(400).json({
       statusCode: 400,
       message: "Bad request",
-    });
-  }
-};
-
-const addProduct = async (req, res, next) => {
-  try {
-    const result = await addProductSchema.validateAsync(req.body);
-    let product = new Products(result);
-    product.save().then((response) => {
-      res.json({
-        message: "Added product Successfully!",
-      });
-    });
-  } catch (error) {
-    console.log("ERRORS: ", error);
-    return res.status(400).json({
-      errors: error.details,
+      errors: error.details[0].message,
     });
   }
 };
@@ -111,9 +84,9 @@ const updateProduct = async (req, res, next) => {
       products: {},
     });
   if (req.body.constructor === Object && Object.keys(req.body).length === 0)
-    return res.status(400).json({
-      statusCode: 400,
-      message: "deo co cai lon gi",
+    return res.status(403).json({
+      statusCode: 403,
+      message: "body equal empty",
     });
   try {
     Products.findByIdAndUpdate(ProductID, req.body).then((data) => {
