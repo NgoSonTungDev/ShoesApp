@@ -16,10 +16,10 @@ const checkUserSchema = joi.object({
   passWord: joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
   firstName: joi.string().min(2).max(100).required(),
   lastName: joi.string().min(2).max(100).required(),
-  phone: joi.number().required(),
-  email: joi.string().email().required(),
-  address: joi.string().min(10).max(200).required(),
-  avt: joi.string(),
+  phone: joi.string().max(10).required(),
+  email: joi.string().email().allow(""),
+  address: joi.string().min(10).max(200).allow(""),
+  avt: joi.string().allow(""),
 });
 
 module.exports = { CheckAddProduct, checkUserSchema };

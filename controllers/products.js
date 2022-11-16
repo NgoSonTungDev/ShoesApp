@@ -29,23 +29,65 @@ const createProduct = async (req, res, next) => {
 //Get all
 const getAllProduct = async (req, res, next) => {
   try {
-    const allProduct = await Products.find();
-    const totalProduct = (await Products.find()).length;
-    if (allProduct.length > 0) {
+    const {
+      pageSize = 12,
+      pageNumber = 1,
+      totalProducts = "",
+      productName = "",
+      productBrand = "",
+      orderByColumn,
+      orderByDirection = "desc",
+    } = req.query;
+
+    const filter = {
+      $and: [
+        {
+          productName: {
+            $regex: productName,
+            $options: "$i",
+          },
+        },
+        {
+          productBrand: {
+            $regex: productBrand,
+            $options: "$i",
+          },
+        },
+      ],
+    };
+
+    const filterProduct = await Products.find(filter)
+      .sort(`${orderByDirection === "asc" ? "_" : ""} ${orderByColumn}`)
+      .limit(pageSize * 1)
+      .skip((pageNumber - 1) * pageSize);
+
+    const allProducts = await Products.find(filter);
+
+    let totalPage = 0;
+    if (allProducts.length % pageSize === 0) {
+      totalPage = allProducts.length / pageSize;
+    } else {
+      totalPage = parseInt(allProducts.length / pageSize) + 1;
+    }
+
+    if (Products.length > 0) {
       res.status(200).json({
-        total: totalProduct,
-        products: allProduct.reverse(),
+        totalPage: totalPage,
+        totalProducts: allProducts.length,
+        products:
+          orderByDirection && orderByColumn
+            ? filterProduct
+            : filterProduct.reverse(),
       });
     } else {
       res.status(200).json({
-        message: "No results",
+        message: "no results",
         products: [],
       });
     }
   } catch (error) {
-    console.log(error);
+    console.log("error: ", error);
     res.status(400).json({
-      statusCode: 400,
       message: "Bad request",
     });
   }
