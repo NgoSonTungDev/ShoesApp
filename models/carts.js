@@ -1,8 +1,16 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const productsSchema = new Schema(
+const cartsSchema = new Schema(
   {
+    userId: {
+      type: String,
+      require: true,
+    },
+    productId: {
+      type: String,
+      require: true,
+    },
     productName: {
       type: String,
       require: true,
@@ -15,28 +23,20 @@ const productsSchema = new Schema(
       type: String,
       require: true,
     },
-    info: {
-      type: String,
-      require: false,
-    },
     price: {
       type: Number,
-      require: true,
-    },
-    discount: {
-      type: Number,
-      require: true,
+      require: false,
     },
     quantity: {
       type: Number,
       require: true,
     },
     images: {
-      type: Object,
+      type: String,
       require: true,
     },
   },
   { timestamps: true }
 );
-const Products = mongoose.model("Products", productsSchema);
-module.exports = Products;
+const Carts = mongoose.model("Carts", cartsSchema);
+module.exports = Carts;

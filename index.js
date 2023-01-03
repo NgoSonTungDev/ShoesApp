@@ -1,48 +1,49 @@
 const express = require("express");
 const mongoose = require("mongoose");
+require("dotenv").config();
 const bodyParser = require("body-parser");
-const ProductsRoute = require("./routers/products");
-const UsersRoute = require("./routers/userRouter");
+const ProductsRouter = require("./routes/products");
+const UsersRouter = require("./routes/users");
+const OrderRouter = require("./routes/orders");
+const CartRouter = require("./routes/carts");
+const CommentRouter = require("./routes/comments");
+const HistoryRouter = require("./routes/historys");
 
-const connection_string =
-  "mongodb+srv://ngosontungdev:ngosontungdev@cluster0.rwtlotx.mongodb.net/test";
+const connection = process.env.MONGOOSE_URL;
 
-////////////////////////////////////////
-mongoose.connect(connection_string, {
+// const connection_string =
+//     'mongodb+srv://ShopApp:ShopApp@cluster0.xpyvfsh.mongodb.net/ShopApp'
+
+mongoose.connect(connection, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
 const database = mongoose.connection;
-
-database.on("error", (error) => {
-  console.log(error);
-});
-
-database.once("connected", () => {
-  console.log("Database Connected");
-});
-////////////////////////////////////////
 
 const app = express();
 
 app.use(express.json());
 
-const PORT = 5000;
+// const PORT = 5000
+const PORT = process.env.PORT;
 
 app.listen(PORT || 3000, () => {
-  console.log(`server is running on ${PORT}`);
+  console.log(`server is running on PORT ${PORT}`);
 });
-
-app.use(bodyParser.json());
+database.on("eror", (eror) => {
+  console.log(eror);
+});
+database.once("connected", () => {
+  console.log("Database Connected");
+});
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("", ProductsRoute);
-app.use("/api/user", UsersRoute);
+app.use(bodyParser.json());
 
-// mongoose.connect(connection_string, (error) => {
-//   if (error) {
-//     console.log("Error :" + error);
-//   } else {
-//     console.log("Connected successfully to server");
-//   }
-// });
+app.use("/api", ProductsRouter);
+app.use("/api", UsersRouter);
+app.use("/api", OrderRouter);
+app.use("/api", CartRouter);
+app.use("/api", CommentRouter);
+app.use("/api", HistoryRouter);

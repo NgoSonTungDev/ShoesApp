@@ -1,44 +1,41 @@
 const Products = require("../models/products");
-const CheckAddProductSchema = require("../helpers/validation");
-// CRUD
-// CREATE - POST
+const ProductValidation = require("../helpers/validation");
+//CRUD
+//CREATE-POST
 const createProduct = async (req, res, next) => {
   try {
-    const validReg = await CheckAddProductSchema.CheckAddProduct.validateAsync(
+    const validBodyReq = await ProductValidation.addProductSchema.validateAsync(
       req.body
     );
-    // let product = new Products(req.body);
-    let product = new Products(validReg);
+    let product = new Products(validBodyReq);
     product.save().then((response) => {
       res.json({
         message: "Added product successfully!",
       });
     });
   } catch (error) {
-    console.log("err : ", error);
+    console.log(" ERR", error);
+
     return res.status(400).json({
-      statusCode: 400,
+      statuscode: 400,
       message: "Bad request",
-      errors: error.details[0].message,
+      errorsMessage: error.details[0].message,
     });
   }
 };
 
-// READ - GET || POST
+// get all product
 
-//Get all
-const getAllProduct = async (req, res, next) => {
+const getAllProducts = async (req, res, next) => {
   try {
     const {
       pageSize = 12,
       pageNumber = 1,
-      totalProducts = "",
       productName = "",
       productBrand = "",
       orderByColumn,
       orderByDirection = "desc",
     } = req.query;
-
     const filter = {
       $and: [
         {
@@ -55,14 +52,12 @@ const getAllProduct = async (req, res, next) => {
         },
       ],
     };
-
     const filterProduct = await Products.find(filter)
-      .sort(`${orderByDirection === "asc" ? "_" : ""} ${orderByColumn}`)
+      .sort(`${orderByDirection === "asc" ? "" : "_"}${orderByColumn}`)
       .limit(pageSize * 1)
       .skip((pageNumber - 1) * pageSize);
 
     const allProducts = await Products.find(filter);
-
     let totalPage = 0;
     if (allProducts.length % pageSize === 0) {
       totalPage = allProducts.length / pageSize;
@@ -93,92 +88,96 @@ const getAllProduct = async (req, res, next) => {
   }
 };
 
-//Get an product by id
-const getAnProduct = async (req, res, next) => {
-  const ProductID = await Products.findById(req.params.productId);
-  if (!ProductID)
-    return res.status(400).json({
-      statusCode: 400,
-      message: "This product Id have not in the database",
-      products: {},
-    });
+// get by id
+const getProductById = async (req, res, next) => {
+  const productId = req.params.productId;
   try {
-    return res.status(200).json({
-      products: ProductID,
-    });
+    const product = await Products.findById(productId);
+    if (product) {
+      res.status(200).json({
+        statuscode: 200,
+        product,
+      });
+    } else {
+      res.json({
+        statuscode: 204,
+        message: "this product Id is have not in the database",
+        product: {},
+      });
+    }
   } catch (error) {
-    console.log(error);
+    console.log("error: ", error);
     res.status(400).json({
-      statusCode: 400,
+      statuscode: 400,
+      message: "Bad request",
+    });
+  }
+};
+//delete product by id
+
+const deleteProductById = async (req, res, next) => {
+  const productId = req.params.productId;
+  try {
+    const product = await Products.findByIdAndRemove(productId);
+    if (product) {
+      res.status(200).json({
+        statuscode: 200,
+        message: "Delete product successfully",
+      });
+    } else {
+      res.json({
+        statuscode: 204,
+        message: "this product Id is have not in the database",
+      });
+    }
+  } catch (error) {
+    console.log("error: ", error);
+    res.status(400).json({
+      statuscode: 400,
       message: "Bad request",
     });
   }
 };
 
-// UPDATE - PUT || PATCH
-
-const updateProduct = async (req, res, next) => {
-  const ProductID = await Products.findById(req.params.productId);
-  if (!ProductID)
-    return res.status(400).json({
-      statusCode: 400,
-      message: "This product Id have not in the database",
-      products: {},
-    });
-  if (req.body.constructor === Object && Object.keys(req.body).length === 0)
-    return res.status(403).json({
-      statusCode: 403,
-      message: "body equal empty",
-    });
+//updata by id
+const editProduct = (req, res, next) => {
   try {
-    Products.findByIdAndUpdate(ProductID, req.body).then((data) => {
+    const productId = req.params.productId;
+    const isBodyEmpTy = Object.keys(req.body).length;
+    if (isBodyEmpTy === 0) {
+      return res.send({
+        statuscode: 403,
+        message: "Body request can not emty.",
+      });
+    }
+    Products.findByIdAndUpdate(productId, req.body).then((data) => {
       if (data) {
-        return res.status(200).json({
-          statusCode: 200,
-          message: "Update success fully",
+        res.status(200).json({
+          statuscode: 200,
+          message: "Update product successfully",
         });
       } else {
-        return res.status(204).json({
-          statusCode: 204,
-          message: "error",
+        res.json({
+          statuscode: 204,
+          message: "This product Id is have not in the database ",
         });
       }
     });
   } catch (error) {
-    console.log(error);
     res.status(400).json({
-      statusCode: 400,
+      statuscode: 400,
       message: "Bad request",
     });
   }
 };
 
-// DELETE - DELETE
-const deleteProduct = async (req, res, next) => {
-  const ProductID = await Products.findByIdAndDelete(req.params.productId);
-  if (!ProductID)
-    return res.status(400).json({
-      statusCode: 400,
-      message: "This product Id have not in the database",
-      products: {},
-    });
-  try {
-    return res.status(200).json({
-      message: "Delete successfullly",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      statusCode: 400,
-      message: "Bad request",
-    });
-  }
-};
-
+//READ-GET  || POST
+//UPDATE-PUT||PATCH
+//DELETE-DELETE
 module.exports = {
   createProduct,
-  getAllProduct,
-  getAnProduct,
-  deleteProduct,
-  updateProduct,
+  getAllProducts,
+  getProductById,
+  deleteProductById,
+  editProduct,
 };

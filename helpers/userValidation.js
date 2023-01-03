@@ -1,35 +1,48 @@
 const joi = require("joi");
-const errFunction = require("../utils/errorFunction");
+const {errorFunction} = require("../utils/errorFunction");
+const patternPassword = /^[a-zA-Z0-9]{3,30}$/;
+const patternPhone = /^[0]{1}[0-9]{9}/;
 
-const checkUserSchema = joi.object({
-  userName: joi.string().trim().min(5).max(30).required(),
-  passWord: joi
+const validation = joi.object({
+  username: joi.string().min(5).max(30).required(),
+  password: joi
     .string()
-    .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
-    .required()
-    .trim(),
-  firstName: joi.string().min(2).max(100).required().trim(),
-  lastName: joi.string().min(2).max(100).required().trim(),
-  phone: joi
+    .min(5)
+    .max(100)
+    .pattern(new RegExp(patternPassword))
+    .required(),
+  firsName: joi.string().min(2).max(10).required(),
+  lastName: joi.string().min(2).max(10).required(),
+  phone: joi.string().length(10).pattern(new RegExp(patternPhone)).required(),
+  email: joi
     .string()
-    .length(10)
-    .pattern(/^[0-9]+$/)
-    .required()
-    .trim(),
-  email: joi.string().email().allow("").trim(),
-  address: joi.string().min(10).max(200).allow("").trim(),
-  avt: joi.string().allow("").trim(),
-  isAdmin: joi.boolean,
+    .email({ tlds: { allow: false } })
+    .allow(""),
+  address: joi.string().min(10).max(100).allow(""),
+  avatar: joi.string().allow(""),
+  isAdmin: joi.boolean().required(),
 });
 
 const userValidation = async (req, res, next) => {
-  const { error } = checkUserSchema.validate(req.body);
+  const paylaod = {
+    username: req.body.userName,
+    password: req.body.password,
+    firsName: req.body.firsName,
+    lastName: req.body.lastName,
+    phone: req.body.phone,
+    address: req.body.addRess,
+    avatar: req.body.avatar,
+    isAdmin: req.body.isAdmin,
+  };
+  const { error } = validation.validate(req.body);
   if (error) {
     res.status(406);
-    return res.json(errFunction(true, `Error in user data : ${error.message}`));
+    return res.json(
+      errorFunction(true, `Error in User Data : ${error.message}`)
+    );
   } else {
     next();
   }
 };
 
-module.exports = userValidation;
+module.exports = { userValidation };

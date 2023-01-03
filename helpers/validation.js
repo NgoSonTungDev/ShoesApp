@@ -1,6 +1,6 @@
 const joi = require("joi");
 
-const CheckAddProduct = joi.object({
+const addProductSchema = joi.object({
   productName: joi.string().min(5).max(100).required(),
   productBrand: joi.string().required(),
   type: joi.string().required(),
@@ -8,18 +8,18 @@ const CheckAddProduct = joi.object({
   price: joi.number().required(),
   discount: joi.number(),
   quantity: joi.number().required(),
-  images: joi.array().min(1).required(),
+  images: joi.array().items(joi.string().required()),
 });
+const patternPassword = /^[a-zA-Z0-9]{3,30}$/
+const addUsersSchema = joi.object({
+    username: joi.string().min(5).max(30).required(),
+    password: joi.string().min(5).max(100).pattern(new RegExp(patternPassword)).required(),
+    firsName: joi.string().min(2).max(10).required(),
+    lastName: joi.string().min(2).max(10).required(),
+    phone:joi.string().max(10).required(),
+    email: joi.string().email({ tlds: { allow: false } }),
+    address: joi.string().min(10).max(100).required(),
+    avatar: joi.string().allow(""),
+  });
 
-const checkUserSchema = joi.object({
-  userName: joi.string().min(5).max(30).required(),
-  passWord: joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
-  firstName: joi.string().min(2).max(100).required(),
-  lastName: joi.string().min(2).max(100).required(),
-  phone: joi.string().max(10).required(),
-  email: joi.string().email().allow(""),
-  address: joi.string().min(10).max(200).allow(""),
-  avt: joi.string().allow(""),
-});
-
-module.exports = { CheckAddProduct, checkUserSchema };
+module.exports = { addProductSchema, addUsersSchema };
